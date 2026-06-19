@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Routine du Soir</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300&family=DM+Sans:wght@300;400&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --cream: #f5f0ea;
+    --midnight: #1e1630;
+    --deep: #160f28;
+    --moon: #c9b8d8;
+    --glow: #e8d5f5;
+    --done: #8ab89a;
+    --warn: #e8c97a;
+    --soft: rgba(201,184,216,0.1);
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body {
+    background: var(--deep);
+    color: var(--cream);
+    font-family: 'DM Sans', sans-serif;
+    font-weight: 300;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Background */
+  .bg {
+    position: fixed; inset: 0; z-index: 0; overflow: hidden;
+    background: radial-gradient(ellipse at 80% 0%, rgba(80,40,120,0.35) 0%, transparent 60%),
+                radial-gradient(ellipse at 20% 100%, rgba(40,20,80,0.3) 0%, transparent 50%),
+                var(--deep);
+  }
+  .stars { position: absolute; inset: 0; }
+  .star {
+    position: absolute; border-radius: 50%; background: white;
+    animation: twinkle var(--d,3s) ease-in-out infinite var(--delay,0s);
+    opacity: var(--o,0.3);
+  }
+  @keyframes twinkle {
+    0%,100% { opacity: var(--o,0.3); transform: scale(1); }
+    50% { opacity: calc(var(--o,0.3)*0.15); transform: scale(0.8); }
+  }
+
+  .container {
+    position: relative; z-index: 1;
+    max-width: 460px; margin: 0 auto;
+    padding: 44px 22px 100px;
+  }
+
+  /* Header */
+  .header { text-align: center; margin-bottom: 36px; }
+  .moon-wrap {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 64px; height: 64px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(201,184,216,0.18), transparent 70%);
+    margin-bottom: 14px;
+    animation: floatMoon 5s ease-in-out infinite;
+  }
+  .moon-wrap span { font-size: 2.2rem; }
+  @keyframes floatMoon {
+    0%,100% { transform: translateY(0); }
+    50% { transform: translateY(-8px); }
+  }
+  h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2.2rem; font-weight: 300;
+    color: var(--glow); letter-spacing: 0.01em;
+  }
+  .subtitle {
+    margin-top: 6px; font-size: 0.72rem;
+    letter-spacing: 0.2em; text-transform: uppercase;
+    color: var(--moon); opacity: 0.55;
+  }
+
+  /* Clock */
+  .clock-row {
+    display: flex; gap: 10px; margin-bottom: 24px;
+  }
+  .clock-card {
+    flex: 1; background: rgba(201,184,216,0.07);
+    border: 1px solid rgba(201,184,216,0.13);
+    border-radius: 14px; padding: 14px 16px;
+    display: flex; flex-direction: column; gap: 3px;
+  }
+  .card-label { font-size: 0.66rem; letter-spacing: 0.14em; text-transform: uppercase; color: var(--moon); opacity: 0.5; }
+  .card-value { font-family: 'Cormorant Garamond', serif; font-size: 1.85rem; font-weight: 300; color: var(--glow); }
+  .card-value.small { font-size: 1.1rem; color: var(--done); margin-top: 2px; }
+
+  /* Progress */
+  .progress-wrap { margin-bottom: 28px; }
+  .progress-header {
+    display: flex; justify-content: space-between;
+    font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase;
+    color: var(--moon); opacity: 0.5; margin-bottom: 7px;
+  }
+  .progress-track {
+    height: 2px; background: rgba(201,184,216,0.1);
+    border-radius: 2px; overflow: hidden;
+  }
+  .progress-fill {
+    height: 100%;
+    background: linear-gradient(90deg, rgba(201,184,216,0.6), var(--done));
+    border-radius: 2px; transition: width 0.6s cubic-bezier(.4,0,.2,1); width: 0%;
+  }
+
+  /* Timeline */
+  .timeline { display: flex; margin-bottom: 30px; }
+  .tl-item {
+    flex: 1; display: flex; flex-direction: column; align-items: center;
+    font-size: 0.6rem; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--moon); opacity: 0.35; transition: opacity 0.4s;
+    cursor: default;
+  }
+  .tl-item.active { opacity: 1; }
+  .tl-line {
+    width: 100%; height: 2px;
+    background: rgba(201,184,216,0.12);
+    margin-bottom: 5px; position: relative;
+    transition: background 0.4s;
+  }
+  .tl-item.active .tl-line { background: var(--moon); }
+  .tl-item.done .tl-line { background: var(--done); }
+  .tl-item.done { opacity: 0.6; color: var(--done); }
+  .tl-dot {
+    position: absolute; left: 50%; top: 50%;
+    transform: translate(-50%, -50%);
+    width: 5px; height: 5px; border-radius: 50%;
+    background: rgba(201,184,216,0.2);
+    transition: background 0.4s;
+  }
+  .tl-item.active .tl-dot { background: var(--moon); box-shadow: 0 0 6px rgba(201,184,216,0.5); }
+  .tl-item.done .tl-dot { background: var(--done); }
+
+  /* Section */
+  .section { margin-bottom: 20px; }
+  .section-header {
+    display: flex; align-items: center; gap: 9px;
+    margin-bottom: 10px;
+  }
+  .section-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--moon); opacity: 0.35; flex-shrink: 0;
+  }
+  .section-title {
+    font-size: 0.65rem; letter-spacing: 0.18em; text-transform: uppercase;
+    color: var(--moon); opacity: 0.45; flex: 1;
+  }
+  .section-line { flex: 1; height: 1px; background: rgba(201,184,216,0.08); }
+
+  /* Step */
+  .step {
+    display: flex; align-items: flex-start; gap: 12px;
+    padding: 13px 15px; border-radius: 12px;
+    border: 1px solid rgba(201,184,216,0.09);
+    background: rgba(255,255,255,0.025);
+    margin-bottom: 6px; cursor: pointer;
+    transition: all 0.25s ease;
+    user-select: none;
+  }
+  .step:hover { border-color: rgba(201,184,216,0.2); background: rgba(201,184,216,0.04); }
+  .step:active { transform: scale(0.99); }
+  .step.done { background: rgba(138,184,154,0.06); border-color: rgba(138,184,154,0.18); }
+  .step.done .step-title { text-decoration: line-through; opacity: 0.4; }
+
+  .step-check {
+    width: 20px; height: 20px; border-radius: 50%;
+    border: 1.5px solid rgba(201,184,216,0.28);
+    flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+    transition: all 0.3s; margin-top: 1px; font-size: 0.7rem;
+  }
+  .step.done .step-check { background: var(--done); border-color: var(--done); color: white; }
+
+  .step-emoji { font-size: 1rem; flex-shrink: 0; margin-top: 1px; }
+  .step-body { flex: 1; min-width: 0; }
+  .step-title { font-size: 0.87rem; color: var(--cream); line-height: 1.3; margin-bottom: 2px; }
+  .step-desc { font-size: 0.71rem; color: var(--moon); opacity: 0.48; line-height: 1.4; }
+  .step-time {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 0.82rem; color: var(--moon); opacity: 0.42;
+    flex-shrink: 0; margin-top: 2px;
+  }
+  .step.done .step-time { opacity: 0.25; }
+
+  /* Alerte */
+  .alert {
+    display: flex; align-items: center; gap: 10px;
+    padding: 11px 14px; margin-bottom: 7px;
+    border-radius: 11px; font-size: 0.77rem;
+  }
+  .alert.warn {
+    background: rgba(232,201,122,0.05);
+    border: 1px solid rgba(232,201,122,0.18);
+    border-left: 3px solid var(--warn);
+    color: var(--warn);
+  }
+  .alert.info {
+    background: rgba(201,184,216,0.05);
+    border: 1px solid rgba(201,184,216,0.15);
+    border-left: 3px solid rgba(201,184,216,0.4);
+    color: var(--moon);
+  }
+
+  /* Completion */
+  .completion {
+    display: none; text-align: center;
+    padding: 36px 20px; animation: fadeUp 0.7s ease both;
+  }
+  .completion.visible { display: block; }
+  .completion-stars { font-size: 1.2rem; letter-spacing: 0.4em; display: block; margin-bottom: 14px; opacity: 0.7; }
+  .completion h2 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 2rem; font-weight: 300; color: var(--glow); margin-bottom: 8px;
+  }
+  .completion p { font-size: 0.8rem; color: var(--moon); opacity: 0.5; }
+
+  .reset-btn {
+    display: block; width: 100%; margin-top: 24px; padding: 13px;
+    background: transparent; border: 1px solid rgba(201,184,216,0.15);
+    border-radius: 12px; color: var(--moon);
+    font-family: 'DM Sans', sans-serif; font-size: 0.75rem;
+    letter-spacing: 0.14em; text-transform: uppercase;
+    cursor: pointer; transition: all 0.3s; opacity: 0.5;
+  }
+  .reset-btn:hover { opacity: 0.9; border-color: rgba(201,184,216,0.3); }
+
+  @keyframes fadeDown {
+    from { opacity:0; transform:translateY(-10px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(10px); }
+    to { opacity:1; transform:translateY(0); }
+  }
+</style>
+</head>
+<body>
+
+<div class="bg"><div class="stars" id="stars"></div></div>
+
+<div class="container">
+
+  <div class="header">
+    <div class="moon-wrap"><span>🌙</span></div>
+    <h1>Routine du Soir</h1>
+    <p class="subtitle">De 18h40 jusqu'à 23h30</p>
+  </div>
+
+  <div class="clock-row">
+    <div class="clock-card">
+      <div class="card-label">Il est</div>
+      <div class="card-value" id="clock">--:--</div>
+    </div>
+    <div class="clock-card">
+      <div class="card-label">Coucher</div>
+      <div class="card-value small">🛏 23h30</div>
+      <div class="card-label" id="time-left" style="margin-top:4px;opacity:0.7"></div>
+    </div>
+  </div>
+
+  <div class="progress-wrap">
+    <div class="progress-header">
+      <span>Progression</span>
+      <span id="progress-count">0 / 17</span>
+    </div>
+    <div class="progress-track">
+      <div class="progress-fill" id="progress-fill"></div>
+    </div>
+  </div>
+
+  <div class="timeline">
+    <div class="tl-item" id="tl0">
+      <div class="tl-line"><div class="tl-dot"></div></div>18h40
+    </div>
+    <div class="tl-item" id="tl1">
+      <div class="tl-line"><div class="tl-dot"></div></div>19h30
+    </div>
+    <div class="tl-item" id="tl2">
+      <div class="tl-line"><div class="tl-dot"></div></div>20h45
+    </div>
+    <div class="tl-item" id="tl3">
+      <div class="tl-line"><div class="tl-dot"></div></div>21h30
+    </div>
+    <div class="tl-item" id="tl4">
+      <div class="tl-line"><div class="tl-dot"></div></div>23h00
+    </div>
+  </div>
+
+  <!-- BLOC 1 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <div class="section-title">18h40 — Retour & activité</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">👟</span>
+      <div class="step-body">
+        <div class="step-title">Changer de tenue dès l'arrivée</div>
+        <div class="step-desc">Tenue sport ou maison — signal immédiat de transition</div>
+      </div>
+      <span class="step-time">18h40</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">💧</span>
+      <div class="step-body">
+        <div class="step-title">Grand verre d'eau</div>
+        <div class="step-desc">Réhydratation après le trajet</div>
+      </div>
+      <span class="step-time">18h43</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🏃‍♀️</span>
+      <div class="step-body">
+        <div class="step-title">Sport ou formation (selon le jour)</div>
+        <div class="step-desc">Tapis, haltères, corde · ou module DCG / SQL / VBA — ~45 min</div>
+      </div>
+      <span class="step-time">18h45</span>
+    </div>
+  </div>
+
+  <!-- BLOC 2 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <div class="section-title">19h30 — Douche & dîner</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🚿</span>
+      <div class="step-body">
+        <div class="step-title">Douche du soir</div>
+        <div class="step-desc">Eau tiède — la chute de température après facilite l'endormissement</div>
+      </div>
+      <span class="step-time">19h30</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🧴</span>
+      <div class="step-body">
+        <div class="step-title">Démaquillage après la douche</div>
+        <div class="step-desc">Peau propre dès maintenant — meilleure absorption des soins</div>
+      </div>
+      <span class="step-time">19h38</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🍽</span>
+      <div class="step-body">
+        <div class="step-title">Préparer le dîner</div>
+        <div class="step-desc">Repas léger de préférence</div>
+      </div>
+      <span class="step-time">19h40</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🥗</span>
+      <div class="step-body">
+        <div class="step-title">Dîner tranquillement</div>
+        <div class="step-desc">Pas d'écran · digestion légère · finir avant 20h45</div>
+      </div>
+      <span class="step-time">20h10</span>
+    </div>
+  </div>
+
+  <!-- BLOC 3 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <div class="section-title">20h45 — Préparation du lendemain</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="alert info">
+      <span>✦</span>
+      <span>2 min pour éviter tout stress matinal demain</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">👗</span>
+      <div class="step-body">
+        <div class="step-title">Préparer la tenue du lendemain</div>
+        <div class="step-desc">Choisie ce soir, plus de décision stressante au réveil</div>
+      </div>
+      <span class="step-time">20h45</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🎒</span>
+      <div class="step-body">
+        <div class="step-title">Préparer le sac & les affaires</div>
+        <div class="step-desc">Tout prêt à la porte — clés, pass, chargeur</div>
+      </div>
+      <span class="step-time">20h50</span>
+    </div>
+  </div>
+
+  <!-- BLOC 4 -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <div class="section-title">21h00 — Déconnexion & calme</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="alert warn">
+      <span>📵</span>
+      <span>Téléphone posé à 21h — règle non négociable</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">📴</span>
+      <div class="step-body">
+        <div class="step-title">Téléphone en mode Ne pas déranger</div>
+        <div class="step-desc">Posé dans une autre pièce ou écran retourné</div>
+      </div>
+      <span class="step-time">21h00</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">💡</span>
+      <div class="step-body">
+        <div class="step-title">Lumières tamisées partout</div>
+        <div class="step-desc">Lampe de chevet ou veilleuse uniquement</div>
+      </div>
+      <span class="step-time">21h05</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🍵</span>
+      <div class="step-body">
+        <div class="step-title">Tisane apaisante</div>
+        <div class="step-desc">Camomille, verveine ou valériane</div>
+      </div>
+      <span class="step-time">21h10</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🌡</span>
+      <div class="step-body">
+        <div class="step-title">Chambre fraîche & volets fermés</div>
+        <div class="step-desc">18–19°C idéalement, obscurité totale</div>
+      </div>
+      <span class="step-time">21h15</span>
+    </div>
+  </div>
+
+  <!-- BLOC 5 : Soin complet -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <div class="section-title">21h30 — Soin du visage & détente</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">✨</span>
+      <div class="step-body">
+        <div class="step-title">Soin complet du visage</div>
+        <div class="step-desc">Sérum, crème, contour des yeux — ton moment</div>
+      </div>
+      <span class="step-time">21h30</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🎶</span>
+      <div class="step-body">
+        <div class="step-title">Musique douce ou silence</div>
+        <div class="step-desc">Sons nature, jazz doux, ou white noise — rien de stimulant</div>
+      </div>
+      <span class="step-time">21h45</span>
+    </div>
+  </div>
+
+  <!-- BLOC 6 : Endormissement -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-dot"></div>
+      <div class="section-title">23h00 — Transition vers le sommeil</div>
+      <div class="section-line"></div>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">📓</span>
+      <div class="step-body">
+        <div class="step-title">Micro-journal du soir</div>
+        <div class="step-desc">1 gratitude · 1 réussite du jour · 1 intention pour demain</div>
+      </div>
+      <span class="step-time">23h00</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">📖</span>
+      <div class="step-body">
+        <div class="step-title">Lecture papier</div>
+        <div class="step-desc">10–15 min, lumière tamisée — aucun écran</div>
+      </div>
+      <span class="step-time">23h10</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">😮‍💨</span>
+      <div class="step-body">
+        <div class="step-title">Respiration 4-7-8</div>
+        <div class="step-desc">Inspire 4s · retiens 7s · expire 8s — 4 cycles</div>
+      </div>
+      <span class="step-time">23h22</span>
+    </div>
+
+    <div class="step" onclick="toggle(this)">
+      <span class="step-check"></span>
+      <span class="step-emoji">🧘‍♀️</span>
+      <div class="step-body">
+        <div class="step-title">Scan corporel progressif</div>
+        <div class="step-desc">Relâche chaque zone du corps des pieds vers la tête — coupe le mental</div>
+      </div>
+      <span class="step-time">23h26</span>
+    </div>
+  </div>
+
+  <div class="completion" id="completion">
+    <span class="completion-stars">✦ ✦ ✦</span>
+    <h2>Bonne nuit</h2>
+    <p>Routine complète · Lumières éteintes · 23h30</p>
+  </div>
+
+  <button class="reset-btn" onclick="resetAll()">↺ Recommencer demain soir</button>
+
+</div>
+
+<script>
+  // Stars
+  const starsEl = document.getElementById('stars');
+  for (let i = 0; i < 90; i++) {
+    const s = document.createElement('div');
+    s.className = 'star';
+    const size = Math.random() * 2.2 + 0.4;
+    s.style.cssText = `width:${size}px;height:${size}px;top:${Math.random()*100}%;left:${Math.random()*100}%;--d:${2+Math.random()*5}s;--o:${0.1+Math.random()*0.45};--delay:${Math.random()*5}s`;
+    starsEl.appendChild(s);
+  }
+
+  // Clock & countdown
+  const TL = [18.67, 19.5, 20.75, 21.5, 23];
+  function updateClock() {
+    const now = new Date();
+    const h = now.getHours(), m = now.getMinutes();
+    document.getElementById('clock').textContent = String(h).padStart(2,'0') + 'h' + String(m).padStart(2,'0');
+
+    // Countdown to 23h30
+    const bedMin = 23*60+30;
+    const nowMin = h*60+m;
+    const diff = bedMin - nowMin;
+    const tl = document.getElementById('time-left');
+    if (diff > 0 && diff < 600) {
+      const dh = Math.floor(diff/60), dm = diff%60;
+      tl.textContent = dh > 0 ? `dans ${dh}h${String(dm).padStart(2,'0')}` : `dans ${dm} min`;
+    } else if (diff <= 0) {
+      tl.textContent = 'Dors bien 🌙';
+    } else {
+      tl.textContent = '';
+    }
+
+    // Timeline
+    const dec = h + m/60;
+    let active = -1;
+    TL.forEach((t,i) => { if (dec >= t) active = i; });
+    document.querySelectorAll('.tl-item').forEach((el,i) => {
+      el.classList.remove('active','done');
+      if (i === active) el.classList.add('active');
+      else if (i < active) el.classList.add('done');
+    });
+  }
+  updateClock();
+  setInterval(updateClock, 20000);
+
+  const TOTAL = 17;
+  function toggle(el) {
+    el.classList.toggle('done');
+    el.querySelector('.step-check').textContent = el.classList.contains('done') ? '✓' : '';
+    updateProgress();
+  }
+  function updateProgress() {
+    const done = document.querySelectorAll('.step.done').length;
+    document.getElementById('progress-count').textContent = done + ' / ' + TOTAL;
+    document.getElementById('progress-fill').style.width = (done/TOTAL*100) + '%';
+    document.getElementById('completion').classList.toggle('visible', done === TOTAL);
+  }
+  function resetAll() {
+    document.querySelectorAll('.step.done').forEach(el => {
+      el.classList.remove('done');
+      el.querySelector('.step-check').textContent = '';
+    });
+    updateProgress();
+  }
+</script>
+</body>
+</html>
